@@ -52,7 +52,7 @@ The entire installation is automated (Ubuntu tested); during the installation pr
 
 ```bash
 sudo chmod +x install.sh
-sudo /.install.sh
+sudo ./install.sh
 ```
 
 ### Unix, manual installation
