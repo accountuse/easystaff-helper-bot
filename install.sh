@@ -31,12 +31,12 @@ err(){    echo -e "${FG_RED}[ERR]${RESET}  ${msg_prefix-}$*" >&2; }
 ask_yn(){
   local prompt="$1"; local default="${2:-y}"; local a
   while true; do
-    read -rp "$(echo -e "${FG_BLUE}[?]${RESET} ${prompt} [y/n] (default: ${default}): ")" a < /dev/tty
+    read -rp "$(echo -e "${FG_BLUE}[?]${RESET} ${prompt} [y/n] (default: ${default}): ")" a
     a="${a:-$default}"
     a="$(printf '%s' "$a" | tr '[:upper:]' '[:lower:]' | sed -E 's/^[[:space:]]+|[[:space:]]+$//g')"
     case "$a" in
-      y|yes|д|да) return 0 ;;            # accept EN/RU yes-forms
-      n|no|н|нет) return 1 ;;            # reject EN/RU no-forms
+      y|yes|д|да) return 0 ;;
+      n|no|н|нет) return 1 ;;
       *) warn "Answer not recognized. Enter y/n." ;;
     esac
   done
@@ -329,12 +329,6 @@ show_how_to_run(){
 main(){
   require_root
 
-  # 0) Repository (clone/update into current directory, then cd into it) — runs before Docker install. [web:731]
-  title "Repository Setup"
-  ensure_git_installed
-  sync_repo_in_pwd
-  enter_repo_dir
-
   # Check if stack is already running
   local stack_running="no"
   if docker ps --format '{{.Names}}' 2>/dev/null | grep -q "easystaff-helper-bot"; then
@@ -351,8 +345,7 @@ main(){
 
   echo -e "${BOLD}1)${RESET} Install"
   echo -e "${BOLD}2)${RESET} Exit"
-  read -rp "$(echo -e "${FG_BLUE}[?]${RESET} Choose option: ")" choice < /dev/tty
-  if [[ -z "${choice:-}" ]]; then choice="1"; fi # fallback to Install
+  read -rp "$(echo -e "${FG_BLUE}[?]${RESET} Choose option: ")" choice
 
   case "$choice" in
     1)
