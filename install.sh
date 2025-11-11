@@ -35,14 +35,75 @@ ask_yn(){
     a="${a:-$default}"
     a="$(printf '%s' "$a" | tr '[:upper:]' '[:lower:]' | sed -E 's/^[[:space:]]+|[[:space:]]+$//g')"
     case "$a" in
-      y|yes|д|да) return 0 ;;
-      n|no|н|нет) return 1 ;;
+      y|yes|д|да) return 0 ;;            # accept EN/RU yes-forms
+      n|no|н|нет) return 1 ;;            # reject EN/RU no-forms
       *) warn "Answer not recognized. Enter y/n." ;;
     esac
   done
 }
 
 require_root(){ [[ $EUID -eq 0 ]] || { err "Run as root (sudo)."; exit 1; } }
+
+# ========== NEW: Repository setup before Docker ==========
+# English: Install git if missing, then clone or update the GitHub repo in the current directory under its GitHub name (easystaff-helper-bot); supports private repos via GITHUB_TOKEN (HTTPS PAT). [web:731][web:726]
+
+REPO_OWNER="${REPO_OWNER:-accountuse}"   # override via env if needed
+REPO_NAME="${REPO_NAME:-easystaff-helper-bot}"  # canonical directory name from GitHub
+
+ensure_git_installed(){
+  # Install Git non-interactively if not present (apt/dnf/yum). [web:731]
+  if command -v git >/dev/null 2>&1; then
+    info "Git is already installed."
+    return 0
+  fi
+  info "Installing Git (non-interactive)..."
+  if command -v apt-get >/dev/null 2>&1; then
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update -y
+    apt-get install -y git
+  elif command -v dnf >/dev/null 2>&1; then
+    dnf -y install git
+  else
+    yum -y install git
+  fi
+  log "Git installed."
+}
+
+build_repo_url(){
+  # Build HTTPS URL; if GITHUB_TOKEN is set, use it to access private repositories. [web:726]
+  if [[ -n "${GITHUB_TOKEN:-}" ]]; then
+    echo "https://${GITHUB_TOKEN}@github.com/${REPO_OWNER}/${REPO_NAME}.git"
+  else
+    echo "https://github.com/${REPO_OWNER}/${REPO_NAME}.git"
+  fi
+}
+
+sync_repo_in_pwd(){
+  # Clone or pull under the invoking user (not root), so files are owned by the user. [web:731]
+  local target_user="${SUDO_USER:-$USER}"
+  local repo_url; repo_url="$(build_repo_url)"
+  local dir="${REPO_NAME}"
+
+  if [[ -d "$dir/.git" ]]; then
+    info "Repository found at ./${dir}, pulling latest..."
+    sudo -u "$target_user" git -C "$dir" pull --ff-only || {
+      warn "git pull failed; trying fetch/reset."
+      sudo -u "$target_user" bash -lc "cd '$dir' && git fetch --all && git reset --hard origin/HEAD"
+    }
+    log "Repository updated."
+  else
+    info "Cloning repository into ./${dir} ..."
+    sudo -u "$target_user" git clone --depth 1 "$repo_url" "$dir"
+    log "Repository cloned."
+  fi
+}
+
+enter_repo_dir(){
+  # Switch working directory to the project for subsequent compose discovery.
+  cd "${REPO_NAME}"
+  info "Working directory switched to $(pwd)"
+}
+# ========== /NEW ==========
 
 # ------------- .env file operations -------------
 env_get(){
@@ -328,6 +389,12 @@ show_how_to_run(){
 # ------------- Main -------------
 main(){
   require_root
+
+  # 0) Repository (clone/update into current directory, then cd into it) — runs before Docker install. [web:731]
+  title "Repository Setup"
+  ensure_git_installed
+  sync_repo_in_pwd
+  enter_repo_dir
 
   # Check if stack is already running
   local stack_running="no"

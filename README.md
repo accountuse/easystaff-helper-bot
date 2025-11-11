@@ -44,8 +44,14 @@ TRACING_ENABLED=false # True if you want to trace Playwright
 
 ### Unix, automatic installation.
 The entire installation is automated (Ubuntu tested); during the installation process, you can enable the use of a database for collecting statistics.
-
+Variant 1 (recommended)
 ```bash
+curl -fsSL https://raw.githubusercontent.com/accountuse/easystaff-helper-bot/main/install.sh | sudo bash -s
+```
+
+Variant 2
+```bash
+su root
 bash <(curl -Ls https://raw.githubusercontent.com/accountuse/easystaff-helper-bot/master/install.sh)
 ```
 
