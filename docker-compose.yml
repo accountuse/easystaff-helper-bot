@@ -1,0 +1,46 @@
+networks:
+  app_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.23.0.0/16
+
+services:
+  bot:
+    build: ./app
+    container_name: easystaff-helper-bot
+    restart: always
+    volumes:
+      - ./app:/app
+      - ./.env:/app/.env:ro
+      - ./app/storage/artifacts:/app/storage/artifacts
+      - ./app/storage/cache:/app/storage/cache
+      - ./app/storage/logs:/app/storage/logs
+    networks:
+      - app_net
+    env_file:
+      - .env
+    depends_on:
+      - mariadb
+    #ports:
+      #- "127.0.0.1:8080:8080"
+      #- "127.0.0.1:5678:5678" # debug
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  mariadb:
+    image: mariadb:11.3
+    container_name: easystaff-helper-db
+    restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+    volumes:
+      - ./doconf/mariadb/mdb.cnf:/etc/mysql/conf.d/mdb.cnf:ro
+      - dbdata:/var/lib/mysql
+    networks:
+      - app_net
+    #ports:
+    #  - "127.0.0.1:3306:3306"
+
+volumes:
+  dbdata:

@@ -1,0 +1,79 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+.eggs/
+build/
+dist/
+wheels/
+pip-wheel-metadata/
+*.manifest
+*.spec
+
+# Virtual environments
+env/
+.env
+.envrc
+.venv
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDEs / Editors
+.vscode/
+.idea/
+*.iml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Testing / Coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.mypy_cache/
+.pytype/
+pytestdebug.log
+
+# Type checkers / Linters
+.pyright/
+.pylint.d/
+
+# Logs and artifacts
+logs/
+*.log
+app/storage/**
+!app/storage/**/
+!app/storage/**/.gitkeep
+trace.zip
+trace_failed.zip
+test-results/
+playwright-report/
+blob-report/
+
+# Database & cache (adjust if needed)
+*.sqlite3
+data/
+cache.json
+
+# Docker
+docker-compose.override.yml
+.docker/
+.dockerignore
+
+# Node (if any UI tooling sneaks in)
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# Misc
+*.swp
+*.swo

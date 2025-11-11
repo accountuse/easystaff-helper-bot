@@ -1,0 +1,11 @@
+aiogram==3.20
+aiohttp>=3.9.0
+playwright==1.55.0
+python-dotenv==1.0.1
+beautifulsoup4>=4.12.0
+requests==2.31.0
+aiocron==1.8
+pytz==2024.1
+greenlet==3.1.1
+#mariadb==1.1.12
+asyncmy==0.2.10
