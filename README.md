@@ -30,6 +30,11 @@ You enter an amount, and the bot converts it to euros using rates from xe.com an
 
 
 ## Quick Start (Docker Compose)
+
+```
+git clone https://github.com/accountuse/easystaff-helper-bot.git
+cd easystaff-helper-bot
+```
 ### ENV
 Rename  ```.env.example``` to ```.env```
 
